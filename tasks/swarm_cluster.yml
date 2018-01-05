@@ -21,6 +21,8 @@
   tags:
     - skip_ansible_lint # Suppressing the linter
 
+- name: debug inventory_hostname
+  debug: msg:"System {{ inventory_hostname  }}"
 - name: Init "Swarm Mode" on the first manager.
   shell: docker swarm init
         --listen-addr {{ docker_swarm_addr }}:{{ docker_swarm_port }}
@@ -74,6 +76,9 @@
   tags:
     - skip_ansible_lint # Suppressing the linter
 
+- name: chang host name
+  hostname:
+    name: "{{ansible_hostname | lower}}"
 - name: Join the pending Swarm manager nodes.
   shell: docker swarm join
         --listen-addr {{ docker_swarm_addr }}:{{ docker_swarm_port }}
@@ -92,7 +97,7 @@
   command: >-
          docker inspect
          --format {% raw %}'{{range $key, $value := .Spec.Labels}}{{printf "%s\n" $key}}{{end}}'{% endraw %}
-         {{ ansible_hostname }}
+         {{ ansible_hostname | lower }}
   register: docker_swarm_labels
   changed_when: False
   delegate_to: "{{ groups['docker_swarm_manager'][0] }}"
